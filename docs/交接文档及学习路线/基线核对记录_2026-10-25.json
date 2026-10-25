@@ -1,0 +1,420 @@
+{
+  "document_date": "2026-10-25",
+  "collector_python_version": "3.11.4 (tags/v3.11.4:d2340ef, Jun  7 2023, 05:45:37) [MSC v.1934 64 bit (AMD64)]",
+  "project_root": ".",
+  "git_snapshot": {
+    "date": "2026-10-25",
+    "root": ".",
+    "head": "4b352199188e37618a2ac20d203c8c454d989f93",
+    "note": "Snapshot of the existing source baseline; handover documents are new working-tree changes."
+  },
+  "project": {
+    "name": "rag-center",
+    "version": "0.1.0",
+    "requires_python": ">=3.11,<3.12"
+  },
+  "target_database": {
+    "postgresql_major": 16,
+    "pgvector_extension": "0.8.1",
+    "compose_image": "pgvector/pgvector:0.8.1-pg16"
+  },
+  "locked_python_packages": {
+    "alembic": "1.20.0",
+    "fastapi": "0.143.2",
+    "httpx": "0.28.1",
+    "pgvector": "0.5.1",
+    "psycopg": "3.3.6",
+    "psycopg-binary": "3.3.6",
+    "pydantic": "2.14.1",
+    "pydantic-settings": "2.16.0",
+    "pytest": "9.1.1",
+    "pytest-asyncio": "1.4.0",
+    "ruff": "0.17.1",
+    "sqlalchemy": "2.0.54",
+    "starlette": "1.8.0",
+    "uvicorn": "0.54.0"
+  },
+  "embedding": {
+    "protocol": "OpenAI-compatible HTTP embeddings",
+    "example_model": "text-embedding-3-small",
+    "example_dimensions": 1536,
+    "live_provider_verified_in_this_document_task": false
+  },
+  "historical_verification": {
+    "source": "VERIFICATION.md",
+    "date": "2026-10-21",
+    "passed": 38,
+    "unit_and_contract_cases": 31,
+    "database_integration_cases": 7,
+    "postgresql": "17.11",
+    "pgvector_extension": "0.8.6",
+    "model_responses": "deterministic vectors and HTTP MockTransport",
+    "target_docker_runtime_verified": false
+  },
+  "current_checks": [
+    {
+      "date": "2026-10-25",
+      "name": "unit_and_contract",
+      "command": ".venv/Scripts/python.exe -m pytest -m 'not integration' -q",
+      "exit_code": 0,
+      "passed": 31,
+      "deselected": 7,
+      "warnings": 1,
+      "warning": "Starlette synchronous TestClient httpx deprecation",
+      "external_database_used": false,
+      "live_model_used": false
+    },
+    {
+      "date": "2026-10-25",
+      "name": "ruff_check",
+      "command": ".venv/Scripts/ruff.exe check .",
+      "exit_code": 0
+    },
+    {
+      "date": "2026-10-25",
+      "name": "ruff_format",
+      "command": ".venv/Scripts/ruff.exe format --check .",
+      "exit_code": 0
+    },
+    {
+      "date": "2026-10-25",
+      "name": "compose_config",
+      "command": "docker compose config --quiet",
+      "exit_code": 0,
+      "containers_started": false
+    },
+    {
+      "date": "2026-10-25",
+      "name": "database_integration",
+      "status": "not_run"
+    },
+    {
+      "date": "2026-10-25",
+      "name": "live_embedding",
+      "status": "not_run"
+    }
+  ],
+  "test_functions": {
+    "test_api_contract.py": [
+      "test_exactly_three_business_operations",
+      "test_validation_uses_envelope",
+      "test_router_errors_use_envelope",
+      "test_domain_and_unexpected_errors_use_envelope",
+      "test_success_envelope_serializes_uuid_and_timestamp"
+    ],
+    "test_config.py": [
+      "test_invalid_configuration_fails_early"
+    ],
+    "test_embedding_provider.py": [
+      "test_batches_inputs_and_restores_response_order",
+      "test_rejects_malformed_or_unusable_embeddings",
+      "test_rejects_non_finite_vectors",
+      "test_upstream_errors_do_not_expose_response_body",
+      "test_timeout_is_reported_as_provider_failure"
+    ],
+    "test_integration.py": [
+      "test_create_upload_retrieve_and_persist_log",
+      "test_tenant_and_knowledge_base_isolation",
+      "test_empty_knowledge_base_returns_empty_structured_result",
+      "test_embedding_failure_preserves_failed_document",
+      "test_vector_write_failure_rolls_back_chunks_and_marks_document_failed",
+      "test_multichunk_indexing_and_top_k_limit",
+      "test_real_lifespan_and_openai_provider_through_all_three_routes"
+    ],
+    "test_text_processing.py": [
+      "test_unicode_chunks_preserve_offsets_and_overlap",
+      "test_splitter_handles_exact_boundaries_and_blank_input",
+      "test_splitter_rejects_non_progressing_windows",
+      "test_plain_text_parser_normalizes_markdown_without_interpreting_it"
+    ]
+  },
+  "source_snapshot": [
+    {
+      "path": ".env.example",
+      "sha256": "3b746ec5897e2aedad4b7ae9159eeed28640076545718edd72668058f9782d1a"
+    },
+    {
+      "path": "alembic.ini",
+      "sha256": "83158e5b72c156eb6e7b7f203a18792c69f5f2e0d0d9f1c495a8b3d8d660437e"
+    },
+    {
+      "path": "app/__init__.py",
+      "sha256": "82eea5aa615ed801ea7f9d497b11a4bb6b536719c9e21251341776e12ec7bd73"
+    },
+    {
+      "path": "app/__main__.py",
+      "sha256": "3a30b7ad8b7b7bea7c94fefe7f673066e4e23d003134e40ba9e50847958a4d4d"
+    },
+    {
+      "path": "app/api/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "app/api/dependencies.py",
+      "sha256": "1668b5440932fcd996a7a2c239ccce9a60e0bf5b002f0265d4f22c395c4a19a5"
+    },
+    {
+      "path": "app/api/v1/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "app/api/v1/router.py",
+      "sha256": "f0bb25807c060e824ec8c5d0ea489eb921113267fd23b45b7d8e266476181563"
+    },
+    {
+      "path": "app/api/v1/routes/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "app/api/v1/routes/documents.py",
+      "sha256": "d30c964f0864d41918a7313cb22de2e83d84dfe333f1d073ba65a46a33301e17"
+    },
+    {
+      "path": "app/api/v1/routes/knowledge_bases.py",
+      "sha256": "3490051a1f6a3e8b2da24a73f11164a13b09e0e73135973a7617e055190956f1"
+    },
+    {
+      "path": "app/api/v1/routes/rag.py",
+      "sha256": "b80fd8ba885f778bb909c940273e8c4b00de569af1f22e371ea8231e8b125d2a"
+    },
+    {
+      "path": "app/core/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "app/core/config.py",
+      "sha256": "8fbe42a0970f4ffc26bc94b5449ce2b631b7c302f148fb5d145a8fbe4c7eed11"
+    },
+    {
+      "path": "app/core/exceptions.py",
+      "sha256": "11f843e2add9b6e7bcf3fb11de2c62085d787369619934dcc1b15707c421f6c3"
+    },
+    {
+      "path": "app/core/logging.py",
+      "sha256": "44abd81611f5040c3688262b3ce5ee4bf44e36b7593569584a2589e8874d8fba"
+    },
+    {
+      "path": "app/db/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "app/db/base.py",
+      "sha256": "bcc04df55f60406b2618166d0ddded38b1900b753e050b78c69899ad010c082b"
+    },
+    {
+      "path": "app/db/session.py",
+      "sha256": "5903d6acce421dc8b73b4506832937e2edb3ade9e9c6aa5b1d10406b35db66c0"
+    },
+    {
+      "path": "app/main.py",
+      "sha256": "3db41b20f32df67b352f3fb803a8c6094b594101dd7dda48532b48cc1aa88088"
+    },
+    {
+      "path": "app/models/__init__.py",
+      "sha256": "e1a35c7ae7b918e4622b53c3787383f7e89adfa1ce4a07f7596703cb5c64fba8"
+    },
+    {
+      "path": "app/models/chunk.py",
+      "sha256": "b4aaafbdd0dca451f3132b3d8a5d5f78ae3aff120eb7f1ac15e3551143220789"
+    },
+    {
+      "path": "app/models/document.py",
+      "sha256": "b5f34bd2fcee61fc6cdbaee63fbde22119abe423a103846c62a6be52037811bc"
+    },
+    {
+      "path": "app/models/knowledge_base.py",
+      "sha256": "173f133fd915b7b77f333d856db1045cfef12077fdda2b25fc101c08af66eb1d"
+    },
+    {
+      "path": "app/models/retrieval_log.py",
+      "sha256": "9eba871abf69f63156beb165a0e5a0a1a569d6df8bfafda14064305760abee6d"
+    },
+    {
+      "path": "app/providers/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "app/providers/embedding/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "app/providers/embedding/base.py",
+      "sha256": "753a91c19a370af66b1a4f7d72ded7bc519a860571a382a8650cd65d7bc9a1fc"
+    },
+    {
+      "path": "app/providers/embedding/openai_compatible.py",
+      "sha256": "d1ac3ae97e79f158652784368bc263072af4539038440196847f107fa089f58e"
+    },
+    {
+      "path": "app/providers/parsers/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "app/providers/parsers/base.py",
+      "sha256": "e1b36bda12d424633cd368bd96170ab1471f22ac77c8bf410093780018fd498e"
+    },
+    {
+      "path": "app/providers/parsers/plain_text.py",
+      "sha256": "7c5bfcf5c9785cb14487444a09cfce53619124c854bbb5fe7c76e4bb6c9c192f"
+    },
+    {
+      "path": "app/providers/vectorstores/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "app/providers/vectorstores/base.py",
+      "sha256": "3eefa4d1f5280f51202e886be265084b38e1169673d4212a16f54778c4ffcc1f"
+    },
+    {
+      "path": "app/providers/vectorstores/pgvector.py",
+      "sha256": "507b66fcfd91424fe21cc97f497954f3395f78f178a50ae7a573676220f0beda"
+    },
+    {
+      "path": "app/repositories/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "app/repositories/chunk_repository.py",
+      "sha256": "199f8399bd92c615505113cefb3f26ce514e390c2b2a0687e17dccccd493b267"
+    },
+    {
+      "path": "app/repositories/document_repository.py",
+      "sha256": "ca494017f19eaf1a202aa0a1494b7c4b1c6f20962d69d9dea0599479f3e309f6"
+    },
+    {
+      "path": "app/repositories/knowledge_base_repository.py",
+      "sha256": "a5acba52aafe350f62798961636403ee0a933bb803046357e602c04d7aa7468e"
+    },
+    {
+      "path": "app/repositories/retrieval_log_repository.py",
+      "sha256": "19d2e50789bec08454eff3fa9986d0bfd685448639d25679db605d8ed99db27b"
+    },
+    {
+      "path": "app/schemas/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "app/schemas/common.py",
+      "sha256": "fe527f2b5329510e1512e204cbaa88beac92227fef3e84e55bb438bcbb6859d1"
+    },
+    {
+      "path": "app/schemas/document.py",
+      "sha256": "0e9bcbeaa8452a9b54dc627bb5fe89eef022ae95885e93532b5685730e89fa33"
+    },
+    {
+      "path": "app/schemas/knowledge_base.py",
+      "sha256": "19a7e75e106f6f67a5616dcf35ecd595824c9223e76ae548089ccaad8d427717"
+    },
+    {
+      "path": "app/schemas/rag.py",
+      "sha256": "f579cbcb3753cc449391849e0e18ad9df3ad3e922595913a3381cf71235f7eff"
+    },
+    {
+      "path": "app/services/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "app/services/document_service.py",
+      "sha256": "0ff0d4d6a1bed0e4bb35fbcc5245f721b599d101820697ee0b448b6a2fb7cba6"
+    },
+    {
+      "path": "app/services/indexing_service.py",
+      "sha256": "54639ab2d4b799ba99a04af9cfc2b2e0501733af7aa2cec198b2f3c469aa29b9"
+    },
+    {
+      "path": "app/services/knowledge_base_service.py",
+      "sha256": "8dd9b731d61aadacf7f1aaa48cbe7ef5edb67c7e2292f99d7e3b032991d71927"
+    },
+    {
+      "path": "app/services/rag_service.py",
+      "sha256": "ee5fdf482d002f23f1a8ce7392717735b9ed050d704eb0ccc8e266adf66f7d42"
+    },
+    {
+      "path": "app/utils/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "app/utils/id_generator.py",
+      "sha256": "6c0b9401d033ec0242bccac9eaaf89457246cab06cd4b2571019fb15501a81bb"
+    },
+    {
+      "path": "app/utils/text_splitter.py",
+      "sha256": "f67ab5aac8bea059d054f8a2ef7c5fb04e4fb98e42c207c0474114fcec37255f"
+    },
+    {
+      "path": "docker-compose.yml",
+      "sha256": "acb2ab04493a940268a09cf878276ba2b74b70dd8fbbd9b64a4e5dbbe93ac93b"
+    },
+    {
+      "path": "Dockerfile",
+      "sha256": "3923a5b1769dd38a3dac573e4c1c0fd86688b8cb92b4462da395d743fe6390e8"
+    },
+    {
+      "path": "migrations/env.py",
+      "sha256": "fe0ce5a011da7cf9775a2a7e1431d9fcd40a4fb10e1652da2f17cac678e6f19a"
+    },
+    {
+      "path": "migrations/versions/0001_initial.py",
+      "sha256": "3e5530417081a64ed8778418c9319433a2e7b0439c15a049d3c1bd72a249dd48"
+    },
+    {
+      "path": "pyproject.toml",
+      "sha256": "e430ba68dd87823ea2f9af6471f2a14e7843535194bf0dedeb07e0111700e40a"
+    },
+    {
+      "path": "requirements.lock",
+      "sha256": "a54d9f18bbc7040eda5a94f672a39aab05dc015f412f5762e5dd53d8690e7e09"
+    },
+    {
+      "path": "tests/conftest.py",
+      "sha256": "1bbc65b02da73ddd49a6e3301dd43088e86f147d149bc7315c49bd4b3e35755c"
+    },
+    {
+      "path": "tests/test_api_contract.py",
+      "sha256": "47b5bfaeb6696c34cced369162f9ce35d3ef306db053a0e1459171e4e8588297"
+    },
+    {
+      "path": "tests/test_config.py",
+      "sha256": "c3079bcb91522051f34b87f51de951e6fa7e2ac106d2350d03506e03e64b8aa6"
+    },
+    {
+      "path": "tests/test_embedding_provider.py",
+      "sha256": "dc6062779a51412b4750811fdb78ee82bc82a232c10512f32e00b9b1245a75cb"
+    },
+    {
+      "path": "tests/test_integration.py",
+      "sha256": "ae4b32aa609136fa77e2dedc73d31865d77374d211d1124ebc2898bb51a13ca4"
+    },
+    {
+      "path": "tests/test_text_processing.py",
+      "sha256": "ab5fcb43a4b40d523905b1edd5a497c0ba08389ca90b8242006a4c4ac7869ee4"
+    },
+    {
+      "path": "uv.lock",
+      "sha256": "c40f387a22934f2e34dc84baa32b26a35f5ccaa5cf7908c737771eccec183b25"
+    }
+  ],
+  "learning_state": "User learning is not recorded; complete unit textbooks are not yet authored.",
+  "document_checks": {
+    "status": "passed",
+    "relative_links_checked": 107,
+    "test_functions_verified": 22,
+    "learning_units": [
+      "U01",
+      "U02",
+      "U03",
+      "U04",
+      "U05",
+      "U06",
+      "U07",
+      "U08",
+      "U09",
+      "U10",
+      "U11",
+      "U12"
+    ],
+    "markdown_code_fences_balanced": true,
+    "errors": []
+  },
+  "path_note": "公开版本中的 project_root 和 git_snapshot.root 已转换为相对于仓库根目录的路径；其他字段保留采集时的基线快照。"
+}

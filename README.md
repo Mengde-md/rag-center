@@ -233,6 +233,10 @@ $env:TEST_DATABASE_URL = 'postgresql+psycopg://postgres:postgres@localhost:5432/
 
 测试覆盖三个接口的最小闭环、真实 cosine 排序、调用日志落库、租户/知识库隔离、Embedding 失败、实际 chunk INSERT 后回滚及 FAILED 状态持久化。集成测试中的 EmbeddingProvider 使用确定性测试向量，不产生外部模型费用；OpenAI-compatible HTTP 协议另通过 MockTransport 验证分批、顺序、异常与维度检查。生产启动始终使用真实的 OpenAI-compatible Provider。未设置 TEST_DATABASE_URL 时集成用例会明确显示为 skipped。
 
+## 学习与交接
+
+现有项目的技术栈基线、源码走读、事务边界、学习路线和交接入口见 [学习与交接文档](docs/README.md)。学习按 3 阶段、20 个核心学习日安排，默认每天 2–3 小时、约 4 周；当前已开启第一阶段 Day01，完整教材与实验已提供。
+
 ## 后续扩展
 
 - 接入 Elasticsearch / OpenSearch，实现 BM25 与向量混合检索。
