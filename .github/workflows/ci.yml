@@ -1,0 +1,32 @@
+name: RAG Center CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.11 and uv
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: '0.13.1'
+          python-version: '3.11'
+          enable-cache: true
+      - name: Install locked runtime and development dependencies
+        run: uv sync --locked --extra dev
+      - name: Check Python code
+        run: uv run --no-sync ruff check .
+      - name: Check formatting
+        run: uv run --no-sync ruff format --check .
+      - name: Run offline unit and Day01 contract tests
+        run: uv run --no-sync pytest tests "docs/学习单元/第一阶段/Day01_实验/test_day01_contract.py" -m "not integration" -q

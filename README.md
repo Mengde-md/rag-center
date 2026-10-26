@@ -233,6 +233,21 @@ $env:TEST_DATABASE_URL = 'postgresql+psycopg://postgres:postgres@localhost:5432/
 
 测试覆盖三个接口的最小闭环、真实 cosine 排序、调用日志落库、租户/知识库隔离、Embedding 失败、实际 chunk INSERT 后回滚及 FAILED 状态持久化。集成测试中的 EmbeddingProvider 使用确定性测试向量，不产生外部模型费用；OpenAI-compatible HTTP 协议另通过 MockTransport 验证分批、顺序、异常与维度检查。生产启动始终使用真实的 OpenAI-compatible Provider。未设置 TEST_DATABASE_URL 时集成用例会明确显示为 skipped。
 
+## 自动检查
+
+推送到 `main` 或提交 Pull Request 时，[GitHub Actions](.github/workflows/ci.yml) 会在 Python 3.11 下按 `uv.lock` 安装运行与开发依赖，执行 Ruff 静态检查、格式检查，以及不依赖真实数据库的业务测试和 Day01 契约实验。也可以在 Actions 页面手动运行。
+
+本地执行相同检查：
+
+```bash
+uv sync --locked --extra dev
+uv run --no-sync ruff check .
+uv run --no-sync ruff format --check .
+uv run --no-sync pytest tests "docs/学习单元/第一阶段/Day01_实验/test_day01_contract.py" -m "not integration" -q
+```
+
+这些检查不需要真实模型密钥，不会替代 PostgreSQL/pgvector 集成验证或真实模型调用验证。
+
 ## 学习与交接
 
 现有项目的技术栈基线、源码走读、事务边界、学习路线和交接入口见 [学习与交接文档](docs/README.md)。学习按 3 阶段、20 个核心学习日安排，默认每天 2–3 小时、约 4 周；当前已开启第一阶段 Day01，完整教材与实验已提供。
