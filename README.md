@@ -69,6 +69,8 @@ Linux/macOS 将虚拟环境命令路径替换为 `.venv/bin/python`、`.venv/bin
 
 Compose 自动把 API 容器中的数据库地址改为 `postgres:5432`。从宿主机连接数据库时，`.env` 的 DATABASE_URL 端口须与 POSTGRES_PORT 一致。
 
+MODEL_BASE_URL 在启动时校验：必须使用 HTTP/HTTPS、具有主机和有效端口，且不能包含账号密码、空白字符、查询参数或片段。仍支持本地 HTTP 端点和 `/v1` 等路径前缀，末尾斜杠会统一移除。模型凭据应单独填写 MODEL_API_KEY；配置异常文本不回显原始配置值。
+
 切片按字符计数，保留规范化文本的 `start_char` / `end_char` 和 `chunk_index`。Embedding Provider 分批请求，按上游 `index` 恢复顺序，校验向量数量、维度、有限值及非零向量。为兼容不同服务，默认请求仅发送 `model`、`input`、`encoding_format=float`，不发送厂商专有参数或 `dimensions`；因此 EMBEDDING_DIMENSIONS 应匹配模型实际输出维度。
 
 初始迁移根据 EMBEDDING_DIMENSIONS 建立向量列及 HNSW cosine 索引，支持 1–2000 维。**建库后更换模型或修改维度需要新增迁移并重新索引全部文档**，即使新旧模型维度相同，也不能混用语义空间。启动时检查数据库向量列维度，发现与配置不一致会直接报错。

@@ -7,7 +7,9 @@ from sqlalchemy.engine import make_url
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", extra="ignore", hide_input_in_errors=True
+    )
 
     app_env: str = "local"
     database_url: str = "postgresql+psycopg://postgres:postgres@localhost:5432/rag_center"
@@ -36,9 +38,27 @@ class Settings(BaseSettings):
     def validate_model_base_url(cls, value: str) -> str:
         from urllib.parse import urlsplit
 
-        url = urlsplit(value)
-        if url.scheme not in {"http", "https"} or not url.netloc or url.query or url.fragment:
-            raise ValueError("MODEL_BASE_URL must be an HTTP(S) base URL without query/fragment")
+        message = (
+            "MODEL_BASE_URL must be an HTTP(S) base URL with a host and valid port, "
+            "without credentials, whitespace, query or fragment"
+        )
+        try:
+            url = urlsplit(value)
+            hostname = url.hostname
+            # urllib validates malformed and out-of-range ports only when this is accessed.
+            _ = url.port
+        except ValueError:
+            raise ValueError(message) from None
+        if (
+            url.scheme not in {"http", "https"}
+            or not hostname
+            or url.username is not None
+            or url.password is not None
+            or "?" in value
+            or "#" in value
+            or any(character.isspace() for character in value)
+        ):
+            raise ValueError(message)
         return value.rstrip("/")
 
     @model_validator(mode="after")
