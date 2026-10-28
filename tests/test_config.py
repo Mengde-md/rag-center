@@ -28,6 +28,7 @@ def test_invalid_configuration_fails_early(values):
         "https://bad host.test/v1",
         "https://example.test/v1\n",
         "https://example.test:invalid/v1",
+        "https://example.test:0/v1",
         "https://example.test:70000/v1",
         "https://:443/v1",
         "https://example.test/v1?",

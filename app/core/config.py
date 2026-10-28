@@ -46,7 +46,7 @@ class Settings(BaseSettings):
             url = urlsplit(value)
             hostname = url.hostname
             # urllib validates malformed and out-of-range ports only when this is accessed.
-            _ = url.port
+            port = url.port
         except ValueError:
             raise ValueError(message) from None
         if (
@@ -54,6 +54,7 @@ class Settings(BaseSettings):
             or not hostname
             or url.username is not None
             or url.password is not None
+            or port == 0
             or "?" in value
             or "#" in value
             or any(character.isspace() for character in value)
