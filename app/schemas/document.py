@@ -15,7 +15,8 @@ class DocumentUpload(RequestModel):
     @field_validator("content")
     @classmethod
     def validate_content(cls, value: str) -> str:
-        if not value.strip():
+        # Match PlainTextParser's leading BOM handling without changing the source text.
+        if not value.lstrip("\ufeff").strip():
             raise ValueError("content must not be blank")
         if "\x00" in value:
             raise ValueError("content must not contain NUL characters")

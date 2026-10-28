@@ -3,9 +3,15 @@ from uuid import UUID
 import pytest
 from fastapi.testclient import TestClient
 
-from app.api.dependencies import get_embedding, get_knowledge_base_service, get_session
+from app.api.dependencies import (
+    get_document_service,
+    get_embedding,
+    get_knowledge_base_service,
+    get_session,
+)
 from app.core.exceptions import KnowledgeBaseNotFound
 from app.main import create_app
+from app.schemas.document import DocumentUpload
 
 
 async def no_database():
@@ -48,6 +54,43 @@ def test_validation_uses_envelope(client, path, body):
     assert response.json()["code"] == 42201
     assert set(response.json()) == {"code", "msg", "data"}
     assert all("input" not in error for error in response.json()["data"])
+
+
+@pytest.mark.parametrize("content", ["\ufeff", "\ufeff \r\n", "\ufeff\ufeff\t"])
+def test_bom_only_documents_are_rejected_before_indexing(client, content):
+    calls = []
+
+    class ForbiddenService:
+        async def upload(self, body):
+            calls.append(body)
+            raise AssertionError("blank documents must not enter the indexing service")
+
+    client.app.dependency_overrides[get_document_service] = lambda: ForbiddenService()
+    response = client.post(
+        "/api/v1/documents/upload",
+        json={
+            "tenant_id": "tenant",
+            "kb_id": "00000000-0000-4000-8000-000000000001",
+            "title": "空文档",
+            "content": content,
+        },
+    )
+    assert response.status_code == 422
+    assert response.json()["code"] == 42201
+    assert any(error["loc"] == ["body", "content"] for error in response.json()["data"])
+    assert all("input" not in error for error in response.json()["data"])
+    assert calls == []
+
+
+def test_document_validation_preserves_bom_and_line_endings_for_parser():
+    content = "\ufeff# 政策\r\n用户可在七天内申请退款。"
+    request = DocumentUpload(
+        tenant_id="tenant",
+        kb_id=UUID("00000000-0000-4000-8000-000000000001"),
+        title="退款政策",
+        content=content,
+    )
+    assert request.content == content
 
 
 def test_router_errors_use_envelope(client):
