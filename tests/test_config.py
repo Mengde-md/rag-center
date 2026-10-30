@@ -21,6 +21,24 @@ def test_invalid_configuration_fails_early(values):
 
 
 @pytest.mark.parametrize(
+    "database_url",
+    [
+        "not-a-database-url-secret",
+        "postgresql+psycopg://user:secret@example.test:private-port/rag",
+    ],
+)
+def test_malformed_database_urls_raise_safe_validation_errors(database_url):
+    with pytest.raises(ValidationError) as error:
+        Settings(_env_file=None, database_url=database_url)
+    message = str(error.value)
+    assert "DATABASE_URL" in message
+    assert database_url not in message
+    assert "secret" not in message
+    assert "private-port" not in message
+    assert "input_value" not in message
+
+
+@pytest.mark.parametrize(
     "base_url",
     [
         "https://user:example@example.test/v1",

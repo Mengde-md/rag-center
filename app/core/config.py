@@ -4,6 +4,7 @@ from typing import Literal
 from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy.engine import make_url
+from sqlalchemy.exc import ArgumentError
 
 
 class Settings(BaseSettings):
@@ -29,7 +30,12 @@ class Settings(BaseSettings):
     @field_validator("database_url")
     @classmethod
     def validate_database_url(cls, value: str) -> str:
-        if make_url(value).drivername != "postgresql+psycopg":
+        try:
+            url = make_url(value)
+        except (ArgumentError, ValueError):
+            # Parser errors may include configuration fragments, such as a malformed port.
+            raise ValueError("DATABASE_URL must be a valid SQLAlchemy database URL") from None
+        if url.drivername != "postgresql+psycopg":
             raise ValueError("DATABASE_URL must use postgresql+psycopg")
         return value
 
