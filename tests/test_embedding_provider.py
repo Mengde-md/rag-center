@@ -1,5 +1,6 @@
 import httpx
 import pytest
+from pydantic import SecretStr
 
 from app.core.config import Settings
 from app.core.exceptions import EmbeddingError
@@ -95,3 +96,45 @@ async def test_timeout_is_reported_as_provider_failure():
     async with httpx.AsyncClient(transport=httpx.MockTransport(timeout)) as client:
         with pytest.raises(EmbeddingError, match="timed out"):
             await OpenAICompatibleEmbeddingProvider(client, config()).embed_query("query")
+
+
+@pytest.mark.parametrize("body", [b"private upstream response", b'{"data":', b"null"])
+async def test_invalid_json_responses_are_sanitized(body):
+    transport = httpx.MockTransport(lambda request: httpx.Response(200, content=body))
+    async with httpx.AsyncClient(transport=transport) as client:
+        with pytest.raises(EmbeddingError) as error:
+            await OpenAICompatibleEmbeddingProvider(client, config()).embed_query("query")
+    assert error.value.status_code == 502
+    assert error.value.msg == "embedding provider returned an invalid response"
+
+
+@pytest.mark.parametrize(
+    "failure", [httpx.ConnectError, httpx.ReadError, httpx.RemoteProtocolError]
+)
+async def test_transport_failures_do_not_expose_upstream_details(failure):
+    def handler(request):
+        raise failure("https://private.example/v1?token=secret", request=request)
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
+        with pytest.raises(EmbeddingError) as error:
+            await OpenAICompatibleEmbeddingProvider(client, config()).embed_query("query")
+    assert error.value.status_code == 502
+    assert error.value.msg == "embedding provider returned an invalid response"
+
+
+@pytest.mark.parametrize("api_key", ["", "your-api-key"])
+async def test_missing_credentials_and_empty_inputs_never_contact_upstream(api_key):
+    requests = []
+
+    def handler(request):
+        requests.append(request)
+        return httpx.Response(500)
+
+    settings = config()
+    settings.model_api_key = SecretStr(api_key)
+    async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
+        provider = OpenAICompatibleEmbeddingProvider(client, settings)
+        assert await provider.embed_texts([]) == []
+        with pytest.raises(EmbeddingError, match="MODEL_API_KEY is not configured"):
+            await provider.embed_query("query")
+    assert requests == []
