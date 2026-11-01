@@ -30,3 +30,36 @@ jobs:
         run: uv run --no-sync ruff format --check .
       - name: Run offline unit and Day01 contract tests
         run: uv run --no-sync pytest tests "docs/学习单元/第一阶段/Day01_实验/test_day01_contract.py" -m "not integration" -q
+
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.1-pg16
+        env:
+          POSTGRES_DB: rag_center_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d rag_center_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      # Disposable CI database; each test also isolates its schema and migrations.
+      TEST_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/rag_center_test
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Python 3.11 and uv
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: '0.13.1'
+          python-version: '3.11'
+          enable-cache: true
+      - name: Install locked runtime and development dependencies
+        run: uv sync --locked --extra dev
+      - name: Verify PostgreSQL transactions, isolation and pgvector retrieval
+        run: uv run --no-sync pytest tests/test_integration.py -m integration -q
