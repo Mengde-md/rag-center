@@ -294,3 +294,61 @@ async def test_real_lifespan_and_openai_provider_through_all_three_routes(databa
                 assert upload.json()["data"]["status"] == 1
                 result = await client.post("/api/v1/rag/retrieve", json=retrieval_body(kb_id))
                 assert result.json()["data"]["retrieved_chunks"][0]["score"] == pytest.approx(1)
+
+
+@pytest.mark.parametrize("failure", ["http", "indexes"])
+async def test_later_embedding_batch_failure_leaves_no_partial_chunks(api, database, failure):
+    from app.providers.embedding.openai_compatible import OpenAICompatibleEmbeddingProvider
+
+    client, app = api
+    kb_id = await create_kb(client)
+    settings = Settings(
+        _env_file=None,
+        model_api_key="test-key",
+        model_base_url="https://model.example/v1",
+        embedding_dimensions=app.state.settings.embedding_dimensions,
+        embedding_batch_size=2,
+    )
+    batches = []
+
+    def embedding_response(request):
+        import json
+
+        inputs = json.loads(request.content)["input"]
+        batches.append(inputs)
+        if len(batches) == 2:
+            if failure == "http":
+                return httpx.Response(503, text="private upstream response")
+            return httpx.Response(200, json={"data": []})
+        return httpx.Response(
+            200,
+            json={
+                "data": [
+                    {"index": i, "embedding": [1.0] + [0.0] * (settings.embedding_dimensions - 1)}
+                    for i in range(len(inputs))
+                ]
+            },
+        )
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(embedding_response)) as model_client:
+        provider = OpenAICompatibleEmbeddingProvider(model_client, settings)
+        app.dependency_overrides[get_embedding] = lambda: provider
+        response = await client.post(
+            "/api/v1/documents/upload", json=document_body(kb_id, "refund policy. " * 250)
+        )
+
+    assert len(batches) == 2
+    assert all(len(batch) == 2 for batch in batches)
+    assert response.status_code == 502
+    payload = response.json()
+    assert payload["code"] == 50202
+    assert payload["data"]["status"] == 2
+    assert payload["data"]["chunk_count"] == 0
+    assert "private upstream response" not in response.text
+    async with database() as session:
+        document = await session.scalar(select(Document))
+        assert str(document.id) == payload["data"]["document_id"]
+        assert document.status == DocumentStatus.FAILED
+        assert document.chunk_count == 0
+        assert document.error_message == payload["msg"]
+        assert await session.scalar(select(func.count()).select_from(Chunk)) == 0
