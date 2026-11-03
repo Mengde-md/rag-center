@@ -51,6 +51,9 @@ def test_malformed_database_urls_raise_safe_validation_errors(database_url):
         "https://:443/v1",
         "https://example.test/v1?",
         "https://example.test/v1#",
+        "\x01https://example.test/v1",
+        "https://example.test/v1\x00extra",
+        "https://example.test/v1\x7f",
     ],
 )
 def test_invalid_model_endpoints_are_rejected_before_requests(base_url):

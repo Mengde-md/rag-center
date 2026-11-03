@@ -46,7 +46,7 @@ class Settings(BaseSettings):
 
         message = (
             "MODEL_BASE_URL must be an HTTP(S) base URL with a host and valid port, "
-            "without credentials, whitespace, query or fragment"
+            "without credentials, whitespace, control characters, query or fragment"
         )
         try:
             url = urlsplit(value)
@@ -63,7 +63,10 @@ class Settings(BaseSettings):
             or port == 0
             or "?" in value
             or "#" in value
-            or any(character.isspace() for character in value)
+            or any(
+                character.isspace() or character < "\x20" or character == "\x7f"
+                for character in value
+            )
         ):
             raise ValueError(message)
         return value.rstrip("/")
