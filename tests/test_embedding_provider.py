@@ -98,7 +98,15 @@ async def test_timeout_is_reported_as_provider_failure():
             await OpenAICompatibleEmbeddingProvider(client, config()).embed_query("query")
 
 
-@pytest.mark.parametrize("body", [b"private upstream response", b'{"data":', b"null"])
+@pytest.mark.parametrize(
+    "body",
+    [
+        b"private upstream response",
+        b'{"data":',
+        b"null",
+        pytest.param(b"[" * 2000 + b"]" * 2000, id="deeply-nested"),
+    ],
+)
 async def test_invalid_json_responses_are_sanitized(body):
     transport = httpx.MockTransport(lambda request: httpx.Response(200, content=body))
     async with httpx.AsyncClient(transport=transport) as client:
