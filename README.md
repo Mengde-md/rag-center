@@ -239,9 +239,12 @@ $env:TEST_DATABASE_URL = 'postgresql+psycopg://postgres:postgres@localhost:5432/
 
 ## 自动检查
 
-推送到 `main` 或提交 Pull Request 时，[GitHub Actions](.github/workflows/ci.yml) 会在 Python 3.11 下按 `uv.lock` 安装运行与开发依赖，执行 Ruff 静态检查、格式检查，以及不依赖真实数据库的业务测试和 Day01 契约实验。也可以在 Actions 页面手动运行。
+推送到 `main` 或提交 Pull Request 时，[GitHub Actions](.github/workflows/ci.yml) 会在 Python 3.11 下按 `uv.lock` 安装运行与开发依赖，并行运行两个任务。也可以在 Actions 页面手动运行。
 
-本地执行相同检查：
+- `quality` 执行 Ruff 静态检查、格式检查，以及离线业务测试和 Day01 契约实验。
+- `integration` 启动 `pgvector/pgvector:0.8.1-pg16` 服务，运行真实 PostgreSQL 16 的迁移、向量检索、租户隔离与事务回滚测试，也覆盖模型后续批次失败时的文档状态和分片清理。每个用例使用独立的临时 schema。
+
+本地重现 `quality` 任务：
 
 ```bash
 uv sync --locked --extra dev
@@ -250,7 +253,13 @@ uv run --no-sync ruff format --check .
 uv run --no-sync pytest tests "docs/学习单元/第一阶段/Day01_实验/test_day01_contract.py" -m "not integration" -q
 ```
 
-这些检查不需要真实模型密钥，不会替代 PostgreSQL/pgvector 集成验证或真实模型调用验证。
+本地重现 `integration` 任务前，先按[测试](#测试)一节创建名称以 `_test` 结尾的独立数据库并设置 `TEST_DATABASE_URL`，再执行：
+
+```powershell
+uv run --no-sync pytest tests/test_integration.py -m integration -q
+```
+
+两个任务均使用确定性向量或 HTTP MockTransport 提供模型响应，无需真实模型密钥。集成任务的数据库迁移、向量写入、检索和事务操作在真实 PostgreSQL 中执行。
 
 ## 学习与交接
 
