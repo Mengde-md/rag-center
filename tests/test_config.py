@@ -74,3 +74,16 @@ def test_invalid_model_endpoints_are_rejected_before_requests(base_url):
 )
 def test_model_endpoints_preserve_supported_hosts_and_path_prefixes(base_url, expected):
     assert Settings(_env_file=None, model_base_url=base_url).model_base_url == expected
+
+
+@pytest.mark.parametrize("model", ["", " ", "\t\r\n"])
+def test_blank_embedding_model_is_rejected(model):
+    with pytest.raises(ValidationError) as error:
+        Settings(_env_file=None, embedding_model=model)
+    assert "EMBEDDING_MODEL must not be blank" in str(error.value)
+    assert "input_value" not in str(error.value)
+
+
+@pytest.mark.parametrize("model", ["text-embedding-3-small", "BAAI/bge-m3", "custom:model-v2"])
+def test_embedding_model_identifiers_are_preserved(model):
+    assert Settings(_env_file=None, embedding_model=model).embedding_model == model

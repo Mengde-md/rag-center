@@ -27,6 +27,13 @@ class Settings(BaseSettings):
     max_content_length: int = Field(default=100_000, ge=1)
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
 
+    @field_validator("embedding_model")
+    @classmethod
+    def validate_embedding_model(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("EMBEDDING_MODEL must not be blank")
+        return value
+
     @field_validator("database_url")
     @classmethod
     def validate_database_url(cls, value: str) -> str:
