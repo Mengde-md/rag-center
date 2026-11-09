@@ -25,6 +25,8 @@ def test_invalid_configuration_fails_early(values):
     [
         "not-a-database-url-secret",
         "postgresql+psycopg://user:secret@example.test:private-port/rag",
+        "postgresql+psycopg://user:secret@example.test:0/rag",
+        "postgresql+psycopg://user:secret@example.test:65536/rag",
     ],
 )
 def test_malformed_database_urls_raise_safe_validation_errors(database_url):

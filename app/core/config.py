@@ -44,6 +44,8 @@ class Settings(BaseSettings):
             raise ValueError("DATABASE_URL must be a valid SQLAlchemy database URL") from None
         if url.drivername != "postgresql+psycopg":
             raise ValueError("DATABASE_URL must use postgresql+psycopg")
+        if url.port is not None and not 1 <= url.port <= 65535:
+            raise ValueError("DATABASE_URL port must be between 1 and 65535")
         return value
 
     @field_validator("model_base_url")
