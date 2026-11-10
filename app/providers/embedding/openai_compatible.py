@@ -26,7 +26,7 @@ class OpenAICompatibleEmbeddingProvider(EmbeddingProvider):
     async def embed_texts(self, texts: list[str]) -> list[list[float]]:
         if not texts:
             return []
-        api_key = self.settings.model_api_key.get_secret_value()
+        api_key = self.settings.model_api_key.get_secret_value().strip()
         if not api_key or api_key == "your-api-key":
             raise EmbeddingError("MODEL_API_KEY is not configured")
         vectors: list[list[float]] = []

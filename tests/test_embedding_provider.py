@@ -130,7 +130,7 @@ async def test_transport_failures_do_not_expose_upstream_details(failure):
     assert error.value.msg == "embedding provider returned an invalid response"
 
 
-@pytest.mark.parametrize("api_key", ["", "your-api-key"])
+@pytest.mark.parametrize("api_key", ["", " \t ", "your-api-key", " your-api-key "])
 async def test_missing_credentials_and_empty_inputs_never_contact_upstream(api_key):
     requests = []
 
