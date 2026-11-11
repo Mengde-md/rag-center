@@ -30,9 +30,10 @@ class Settings(BaseSettings):
     @field_validator("embedding_model")
     @classmethod
     def validate_embedding_model(cls, value: str) -> str:
-        if not value.strip():
+        model = value.strip()
+        if not model:
             raise ValueError("EMBEDDING_MODEL must not be blank")
-        return value
+        return model
 
     @field_validator("database_url")
     @classmethod

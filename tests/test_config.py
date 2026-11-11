@@ -89,3 +89,9 @@ def test_blank_embedding_model_is_rejected(model):
 @pytest.mark.parametrize("model", ["text-embedding-3-small", "BAAI/bge-m3", "custom:model-v2"])
 def test_embedding_model_identifiers_are_preserved(model):
     assert Settings(_env_file=None, embedding_model=model).embedding_model == model
+
+
+def test_embedding_model_trims_surrounding_whitespace():
+    settings = Settings(_env_file=None, embedding_model=" \tBAAI/bge-m3\n")
+
+    assert settings.embedding_model == "BAAI/bge-m3"
