@@ -1,5 +1,9 @@
 # 验证记录
 
+## 2026-11-13 GitHub CI
+
+[配置说明更新 bdb9055](https://github.com/Mengde-md/rag-center/commit/bdb9055149eb1d9256b48ecf3e59b8d3dfcf982c) 对应的 [GitHub Actions 运行](https://github.com/Mengde-md/rag-center/actions/runs/43326878616) 中，`quality` 和 `integration` 均通过。本地同一提交的内容通过 Ruff、84 项离线测试及 9 项 PostgreSQL/pgvector 集成测试。模型响应使用测试替身。
+
 ## 2026-11-08 GitHub CI
 
 验证基线为 [9cc7201](https://github.com/Mengde-md/rag-center/commit/9cc72016b3e8ab792fca7bc4a85e265b4c476265)，对应的 [GitHub Actions 运行](https://github.com/Mengde-md/rag-center/actions/runs/42418976549)已通过。
