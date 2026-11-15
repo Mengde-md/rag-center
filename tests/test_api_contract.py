@@ -7,6 +7,7 @@ from app.api.dependencies import (
     get_document_service,
     get_embedding,
     get_knowledge_base_service,
+    get_rag_service,
     get_session,
 )
 from app.core.exceptions import KnowledgeBaseNotFound
@@ -91,6 +92,32 @@ def test_document_validation_preserves_bom_and_line_endings_for_parser():
         content=content,
     )
     assert request.content == content
+
+
+@pytest.mark.parametrize("query", [" \t\n", "query\x00with NUL"])
+def test_invalid_retrieval_queries_are_rejected_before_search(client, query):
+    calls = []
+
+    class ForbiddenService:
+        async def retrieve(self, body):
+            calls.append(body)
+            raise AssertionError("invalid queries must not enter the retrieval service")
+
+    client.app.dependency_overrides[get_rag_service] = lambda: ForbiddenService()
+    response = client.post(
+        "/api/v1/rag/retrieve",
+        json={
+            "tenant_id": "tenant",
+            "kb_id": "00000000-0000-4000-8000-000000000001",
+            "user_id": "user",
+            "query": query,
+        },
+    )
+    assert response.status_code == 422
+    assert response.json()["code"] == 42201
+    assert any(error["loc"] == ["body", "query"] for error in response.json()["data"])
+    assert all("input" not in error for error in response.json()["data"])
+    assert calls == []
 
 
 def test_router_errors_use_envelope(client):
