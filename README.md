@@ -67,6 +67,8 @@ Linux/macOS 将虚拟环境命令路径替换为 `.venv/bin/python`、`.venv/bin
 | MAX_CONTENT_LENGTH | 100000 | 单次上传的最大内容字符数 |
 | POSTGRES_PORT / API_PORT | 5432 / 8000 | Compose 映射到本机的端口 |
 
+`MAX_CONTENT_LENGTH` 按上传请求中 `content` 的 Unicode 字符数检查，在移除 BOM 和规范化换行之前计数。CRLF 换行占两个字符。超过上限时，接口在创建文档记录和调用模型前返回 HTTP 413，业务错误码为 `41301`。
+
 Compose 自动把 API 容器中的数据库地址改为 `postgres:5432`。从宿主机连接数据库时，`.env` 的 DATABASE_URL 端口须与 POSTGRES_PORT 一致。
 
 MODEL_BASE_URL 在启动时校验：必须使用 HTTP/HTTPS、具有主机和有效端口，且不能包含账号密码、空白字符、查询参数或片段。仍支持本地 HTTP 端点和 `/v1` 等路径前缀，末尾斜杠会统一移除。模型凭据应单独填写 MODEL_API_KEY；配置异常文本不回显原始配置值。模型请求会去掉密钥首尾空白。若密钥为空或仍是示例占位值，服务会在发出请求前返回配置错误。
