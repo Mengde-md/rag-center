@@ -154,6 +154,8 @@ Embedding Provider 分批请求，按上游 `index` 恢复顺序，校验向量�
 }
 ```
 
+`query` 最长为 8000 个 Unicode 字符，首尾空白也计入长度。空字符串、纯空白、包含 NUL 字符或超过长度上限的查询会在检索前返回 HTTP 422，业务错误码为 `42201`。
+
 `data` 包含 `query`、`kb_id`、`retrieved_chunks` 与 `metadata`。每个 chunk 包含 document_id、chunk_id、title、content、score、metadata（切片序号与字符位置等引用元数据）。外层 metadata 包含 top_k、vector_store、retrieval_log_id。
 
 按余弦相似度 `1 - cosine_distance` 降序返回，分数范围为 [-1, 1]，不代表概率。只召回当前租户、当前知识库、已成功索引文档的 chunk。HNSW 为近似检索，启用 pgvector 0.8+ 的迭代扫描以改善过滤后的召回；在大数据量下仍需评测和调优。空知识库返回空列表。
