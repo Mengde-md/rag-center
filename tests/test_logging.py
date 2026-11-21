@@ -16,11 +16,24 @@ def test_configured_level_applies_with_an_existing_handler(monkeypatch):
         configure_logging("INFO")
         root.info("configured info")
         root.debug("hidden debug")
+        for logger in loggers[1:]:
+            logger.info("hidden request details")
+            logger.warning("visible HTTP warning")
         configure_logging("ERROR")
         root.info("hidden info")
         root.error("configured error")
+        for logger in loggers[1:]:
+            logger.warning("hidden HTTP warning")
+            logger.error("visible HTTP error")
 
-        assert output.getvalue().splitlines() == ["configured info", "configured error"]
+        assert output.getvalue().splitlines() == [
+            "configured info",
+            "visible HTTP warning",
+            "visible HTTP warning",
+            "configured error",
+            "visible HTTP error",
+            "visible HTTP error",
+        ]
     finally:
         for logger, previous_level in zip(loggers, previous_levels, strict=True):
             logger.setLevel(previous_level)
