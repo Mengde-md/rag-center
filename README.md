@@ -54,6 +54,7 @@ Linux/macOS 将虚拟环境命令路径替换为 `.venv/bin/python`、`.venv/bin
 | 配置 | 默认值 | 用途 |
 | --- | --- | --- |
 | APP_ENV | local | 环境标识 |
+| LOG_LEVEL | INFO | 应用日志级别，可选 `DEBUG`、`INFO`、`WARNING`、`ERROR`、`CRITICAL` |
 | DATABASE_URL | postgresql+psycopg://postgres:postgres@localhost:5432/rag_center | PostgreSQL 连接 |
 | MODEL_BASE_URL | https://api.openai.com/v1 | Embedding 基础 URL，调用时追加 `/embeddings` |
 | MODEL_API_KEY | 空 | 模型凭据，仅通过 Authorization 请求头发送 |
@@ -66,6 +67,8 @@ Linux/macOS 将虚拟环境命令路径替换为 `.venv/bin/python`、`.venv/bin
 | TOP_K | 5 | 最大召回数量 |
 | MAX_CONTENT_LENGTH | 100000 | 单次上传的最大内容字符数 |
 | POSTGRES_PORT / API_PORT | 5432 / 8000 | Compose 映射到本机的端口 |
+
+`httpx` 和 `httpcore` 的日志最低级别为 `WARNING`。将 `LOG_LEVEL` 设为 `DEBUG` 可以查看应用调试日志。设为 `ERROR` 或 `CRITICAL` 时，两个 HTTP 客户端日志记录器也使用相同级别。
 
 `MAX_CONTENT_LENGTH` 按上传请求中 `content` 的 Unicode 字符数检查，在移除 BOM 和规范化换行之前计数。CRLF 换行占两个字符。超过上限时，接口在创建文档记录和调用模型前返回 HTTP 413，业务错误码为 `41301`。
 
