@@ -76,6 +76,8 @@ Compose 自动把 API 容器中的数据库地址改为 `postgres:5432`。从宿
 
 MODEL_BASE_URL 在启动时校验：必须使用 HTTP/HTTPS、具有主机和有效端口，且不能包含账号密码、空白字符、查询参数或片段。仍支持本地 HTTP 端点和 `/v1` 等路径前缀，末尾斜杠会统一移除。模型凭据应单独填写 MODEL_API_KEY；配置异常文本不回显原始配置值。模型请求会去掉密钥首尾空白。若密钥为空或仍是示例占位值，服务会在发出请求前返回配置错误。
 
+配置切片时，`CHUNK_SIZE` 至少为 1，`CHUNK_OVERLAP` 可设为 0，且必须小于 `CHUNK_SIZE`。例如，窗口大小为 4、重叠为 1 时，文本 `1234567` 生成 `1234` 和 `4567` 两个片段。减小窗口时需同时检查重叠值，否则服务会在启动时报告配置错误。
+
 切片以规范化文本的 Unicode 字符为单位。解析时移除开头的 BOM，并把 CRLF 和 CR 转为 LF。检索结果中的 `start_char`（含）和 `end_char`（不含）可用于切出对应片段。纯空白窗口会跳过，`chunk_index` 从 0 起按保留的片段连续编号。
 
 Embedding Provider 分批请求，按上游 `index` 恢复顺序，校验向量数量、维度、有限值及非零向量。为兼容不同服务，默认请求仅发送 `model`、`input`、`encoding_format=float`，不发送厂商专有参数或 `dimensions`；因此 EMBEDDING_DIMENSIONS 应匹配模型实际输出维度。
