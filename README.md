@@ -64,7 +64,7 @@ Linux/macOS 将虚拟环境命令路径替换为 `.venv/bin/python`、`.venv/bin
 | MODEL_TIMEOUT_SECONDS | 60 | 单次模型 HTTP 请求超时秒数 |
 | VECTOR_STORE | pgvector | 向量库实现选择 |
 | CHUNK_SIZE / CHUNK_OVERLAP | 800 / 100 | Unicode 字符窗口大小与重叠字符数 |
-| TOP_K | 5 | 最大召回数量 |
+| TOP_K | 5 | 每次检索最多返回的片段数，取值为 1 到 100 |
 | MAX_CONTENT_LENGTH | 100000 | 单次上传的最大内容字符数 |
 | POSTGRES_PORT / API_PORT | 5432 / 8000 | Compose 映射到本机的端口 |
 
@@ -162,6 +162,8 @@ Embedding Provider 分批请求，按上游 `index` 恢复顺序，校验向量�
 `query` 最长为 8000 个 Unicode 字符，首尾空白也计入长度。空字符串、纯空白、包含 NUL 字符或超过长度上限的查询会在检索前返回 HTTP 422，业务错误码为 `42201`。
 
 `data` 包含 `query`、`kb_id`、`retrieved_chunks` 与 `metadata`。每个 chunk 包含 document_id、chunk_id、title、content、score、metadata（切片序号与字符位置等引用元数据）。外层 metadata 包含 top_k、vector_store、retrieval_log_id。
+
+召回上限由服务端的 `TOP_K` 配置决定。在请求体中添加 `top_k` 会收到 HTTP 422（业务码 `42201`）。响应里的 `metadata.top_k` 是配置的上限，实际命中数请读取 `retrieved_chunks` 的长度。
 
 按余弦相似度 `1 - cosine_distance` 降序返回，分数范围为 [-1, 1]，不代表概率。只召回当前租户、当前知识库、已成功索引文档的 chunk。HNSW 为近似检索，启用 pgvector 0.8+ 的迭代扫描以改善过滤后的召回；在大数据量下仍需评测和调优。空知识库返回空列表。
 
