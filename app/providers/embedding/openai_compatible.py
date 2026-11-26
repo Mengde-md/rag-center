@@ -51,6 +51,8 @@ class OpenAICompatibleEmbeddingProvider(EmbeddingProvider):
                 raise EmbeddingError(
                     f"embedding provider returned HTTP {exc.response.status_code}"
                 ) from exc
+            except httpx.TransportError as exc:
+                raise EmbeddingError() from exc
             except (httpx.RequestError, RecursionError, ValidationError, ValueError) as exc:
                 raise EmbeddingError("embedding provider returned an invalid response") from exc
 

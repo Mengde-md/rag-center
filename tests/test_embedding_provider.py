@@ -127,7 +127,8 @@ async def test_transport_failures_do_not_expose_upstream_details(failure):
         with pytest.raises(EmbeddingError) as error:
             await OpenAICompatibleEmbeddingProvider(client, config()).embed_query("query")
     assert error.value.status_code == 502
-    assert error.value.msg == "embedding provider returned an invalid response"
+    assert error.value.code == 50201
+    assert error.value.msg == "embedding provider unavailable"
 
 
 @pytest.mark.parametrize("api_key", ["", " \t ", "your-api-key", " your-api-key "])
